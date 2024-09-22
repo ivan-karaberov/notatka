@@ -1,6 +1,6 @@
 from .base import Base
 from .user import User
-from .roles import Role
+from .role import Role
 
 __all__ = [
     "Base",

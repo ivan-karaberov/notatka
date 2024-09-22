@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING, List
+
 from sqlalchemy import Integer, Boolean, String, LargeBinary, DateTime, \
                         TIMESTAMP, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
+from .user_roles import user_roles
+if TYPE_CHECKING:
+    from .role import Role
 
 class User(Base):
     id: Mapped[int] = mapped_column(
@@ -27,3 +32,4 @@ class User(Base):
         nullable=True
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default='True')
+    roles: Mapped[List["Role"]] = relationship("Role", secondary=user_roles, back_populates="users")
