@@ -10,6 +10,7 @@ packages = [{include = "account_microservice"}]
 python = "^3.10"
 fastapi = "^0.115.0"
 uvicorn = {extras = ["standart"], version = "^0.30.6"}
+sqlalchemy = "^2.0.35"
 
 
 [build-system]
