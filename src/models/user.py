@@ -8,6 +8,7 @@ from .base import Base
 from .user_roles import user_roles
 if TYPE_CHECKING:
     from .role import Role
+    from .session import Session
 
 class User(Base):
     id: Mapped[int] = mapped_column(
@@ -16,10 +17,10 @@ class User(Base):
         autoincrement=True,
         index=True
     )
-    firstname: Mapped[str] = mapped_column(String(50),unique=True, nullable=False)
-    last_name: Mapped[str] = mapped_column(String(50),unique=True, nullable=False)
+    firstName: Mapped[str] = mapped_column(String(50), nullable=False)
+    lastName: Mapped[str] = mapped_column(String(50), nullable=False)
     username: Mapped[str] = mapped_column(String(32),unique=True, nullable=False)
-    hash_password: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
+    hashed_password: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     created_at: Mapped[DateTime] = mapped_column(
         TIMESTAMP(timezone=True),
         default=func.now(),
@@ -32,3 +33,4 @@ class User(Base):
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default='True')
     roles: Mapped[List["Role"]] = relationship("Role", secondary=user_roles, back_populates="users")
+    sessions: Mapped[List["Session"]] = relationship("Session", back_populates="user")
