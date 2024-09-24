@@ -19,7 +19,7 @@ class User(Base):
     )
     firstName: Mapped[str] = mapped_column(String(50), nullable=False)
     lastName: Mapped[str] = mapped_column(String(50), nullable=False)
-    username: Mapped[str] = mapped_column(String(32),unique=True, nullable=False)
+    username: Mapped[str] = mapped_column(String(32), unique=True, nullable=False)
     hashed_password: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
     created_at: Mapped[DateTime] = mapped_column(
         TIMESTAMP(timezone=True),
