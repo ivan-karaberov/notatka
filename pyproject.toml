@@ -16,6 +16,7 @@ black = "^24.8.0"
 pydantic-settings = "^2.5.2"
 asyncpg = "^0.29.0"
 bcrypt = "^4.2.0"
+pyjwt = "^2.9.0"
 
 
 [build-system]
