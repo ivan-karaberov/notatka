@@ -1,7 +1,7 @@
 from typing import List
 
 from models.user import User
-from schemas.user import SignUpSchema
+from schemas.auth import SignUpSchema
 from errors.api_errors import UserAlreadyExistsException
 from utils.auth import hash_password
 from repositories.role import RoleRepository
