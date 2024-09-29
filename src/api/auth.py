@@ -1,8 +1,9 @@
 from fastapi import APIRouter, status, HTTPException
 
-from schemas.user import SignUpSchema, SignInSchema
-from schemas.auth import TokenPairSchema, RefreshTokenSchema
+from schemas.auth import SignUpSchema, SignInSchema, TokenPairSchema, \
+                            RefreshTokenSchema
 from services.user import UserService
+from services.auth import AuthService
 from repositories.user import UserRepository
 from errors.api_errors import APIException
 
@@ -25,7 +26,16 @@ async def signup(signup_data: SignUpSchema):
 
 @router.post("/signin", response_model=TokenPairSchema)
 async def signin(signin_data: SignInSchema):
-    pass
+    """Получение новой пары jwt пользователя"""
+    try:
+        return await AuthService().get_auth_token_pair(signin_data)
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed signin"
+            )
 
 
 @router.put("/signout")

@@ -1,13 +1,12 @@
-from typing import List
-
 from models.user import User
 from schemas.auth import SignUpSchema
 from errors.api_errors import UserAlreadyExistsException
 from utils.auth import hash_password
+from utils.repository import AbstractRepository
 
 
 class UserService:
-    def __init__(self, user_repo) -> None:
+    def __init__(self, user_repo: AbstractRepository) -> None:
         self.user_repo = user_repo()
 
     async def create_user(

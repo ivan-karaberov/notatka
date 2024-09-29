@@ -1,4 +1,5 @@
 from typing import Annotated
+from datetime import datetime
 
 from pydantic import BaseModel, Field
 
@@ -22,3 +23,14 @@ class TokenPairSchema(BaseModel):
 
 class RefreshTokenSchema(BaseModel):
     refresh_token: str
+
+
+class PayloadSchema(BaseModel):
+    sub: int
+    role: str
+
+
+class SessionSchema(BaseModel):
+    user_id: int
+    refresh_token: str
+    expires_at: datetime

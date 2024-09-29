@@ -1,6 +1,5 @@
-from datetime import datetime
-
-from sqlalchemy import Integer, String, ForeignKey, DateTime, TIMESTAMP, func
+from sqlalchemy import Integer, String, ForeignKey, DateTime, TIMESTAMP, func, \
+                Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -16,13 +15,16 @@ class Session(Base):
         ForeignKey('users.id'),
         nullable=False
     )
-    token: Mapped[str] = mapped_column(String(255), nullable=False)
+    refresh_token: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[DateTime] = mapped_column(
         TIMESTAMP(timezone=True),
         default=func.now(),
         server_default=func.now()
     )
-    expires_at: Mapped[datetime] = mapped_column(TIMESTAMP, nullable=False)
-
+    is_deactivated: Mapped[bool] = mapped_column(Boolean, default=False, server_default="False")
+    expires_at: Mapped[DateTime] = mapped_column(
+        TIMESTAMP(timezone=True),
+        nullable=False
+    )
     # Опционально: связь с моделью User
     user = relationship("User", back_populates="sessions")
