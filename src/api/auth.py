@@ -1,9 +1,10 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, HTTPException
 
 from schemas.user import SignUpSchema, SignInSchema
 from schemas.auth import TokenPairSchema, RefreshTokenSchema
 from services.user import UserService
 from repositories.user import UserRepository
+from errors.api_errors import APIException
 
 router = APIRouter()
 
@@ -13,13 +14,18 @@ async def signup(signup_data: SignUpSchema):
     """Регистрация нового аккаунта"""
     try:
         return await UserService(UserRepository).create_user(signup_data)
-    except Exception as e:
-        print(f"ERROR > {e}")
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed signup"
+        )
+
 
 @router.post("/signin", response_model=TokenPairSchema)
-async def signin(user: SignInSchema):
-    """Получение новой пары jwt пользователя"""
-    return user
+async def signin(signin_data: SignInSchema):
+    pass
 
 
 @router.put("/signout")

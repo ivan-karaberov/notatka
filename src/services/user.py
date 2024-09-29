@@ -2,7 +2,7 @@ from typing import List
 
 from models.user import User
 from schemas.user import SignUpSchema
-from erros.api_erros import UserAlreadyExistsException
+from errors.api_errors import UserAlreadyExistsException
 from utils.auth import hash_password
 from repositories.role import RoleRepository
 
