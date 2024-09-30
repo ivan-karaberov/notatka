@@ -27,3 +27,8 @@ class InvalidTokenException(APIException):
 class TokenExpiredException(APIException):
     status_code = status.HTTP_403_FORBIDDEN
     detail = "Token has expired"
+
+
+class InvalidRefreshTokenException(APIException):
+    status_code = status.HTTP_403_FORBIDDEN
+    detail = "Invalid refresh token"

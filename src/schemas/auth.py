@@ -29,6 +29,7 @@ class PayloadSchema(BaseModel):
     sub: int
     role: str
     session_uuid: str
+    is_refresh: bool
 
 
 class SessionSchema(BaseModel):

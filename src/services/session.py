@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from utils.repository import AbstractRepository
 from schemas.auth import SessionSchema
 from models.session import Session
@@ -27,3 +29,15 @@ class SessionService:
 
     async def get_session_by_uuid(self, session_uuid: str):
         return await self.session_repo.fetch_one(session_uuid=session_uuid)
+
+    async def update_refresh_token(
+        self, 
+        session_id: int,
+        refresh_token: str,
+        expires_at: datetime
+    ):
+        await self.session_repo.update(
+            id=session_id,
+            refresh_token=refresh_token,
+            expires_at=expires_at
+        )

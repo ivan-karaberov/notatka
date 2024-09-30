@@ -65,7 +65,7 @@ async def validate(accessToken: str):
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed signout"
+            detail="Failed validation"
         )
 
 
@@ -73,4 +73,12 @@ async def validate(accessToken: str):
 @router.post("/refresh")
 async def refresh(refreshToken: RefreshTokenSchema):
     """Обновление пары токенов"""
-    pass
+    try:
+        return await AuthService().refresh_token(refreshToken.refresh_token)
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed refresh"
+        )

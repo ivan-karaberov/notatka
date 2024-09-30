@@ -61,11 +61,12 @@ def validate_password(
 
 
 def generate_auth_token_pair(payload: PayloadSchema):
-    payload_dict = payload.model_dump()
-
-    access_token=encode_jwt(payload_dict)
+    payload.is_refresh = False
+    access_token=encode_jwt(payload.model_dump())
+    
+    payload.is_refresh = True
     refresh_token=encode_jwt(
-        payload=payload_dict,
+        payload=payload.model_dump(),
         expire_minutes=settings.auth_jwt.refresh_token_expire_minutes
     )
 
@@ -84,20 +85,26 @@ def get_payload_from_token(token: str) -> dict:
         raise InvalidTokenException
 
 
-def get_user_from_payload(payload: dict) -> PayloadSchema:
+def get_user_from_payload(payload: dict, refresh=False) -> PayloadSchema:
     sub = payload.get("sub")
     role = payload.get("role")
     session_uuid = payload.get("session_uuid")
+    is_refresh = payload.get("is_refresh")
 
-    if (sub is None) or (role is None) or (session_uuid is None):
+    if (sub is None) or (role is None) or (session_uuid is None) or \
+        (is_refresh is None):
         raise InvalidTokenException
 
-
     if jwt_black_list.get(session_uuid):
+        raise InvalidTokenException
+
+    # Если мы ожидали accessToken а нам передали refreshToken
+    if not refresh and is_refresh:
         raise InvalidTokenException
 
     return PayloadSchema(
         sub=sub,
         role=role,
-        session_uuid=session_uuid
+        session_uuid=session_uuid,
+        is_refresh=is_refresh
     )
