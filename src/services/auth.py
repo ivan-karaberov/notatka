@@ -8,7 +8,8 @@ from services.session import SessionService
 from repositories.user import UserRepository
 from repositories.session import SessionRepository
 from errors.api_errors import UnauthorizedUserException
-from utils.auth import generate_auth_token_pair
+from utils.auth import generate_auth_token_pair, get_payload_from_token, \
+                        get_user_from_payload
 from core.config import settings
 from core.redis.redis_helper import jwt_black_list
 
@@ -47,3 +48,8 @@ class AuthService:
         """Закрывает сессию и добавляет токен в черный список"""
         jwt_black_list.set(payload.session_uuid, payload.sub, ex=settings.auth_jwt.access_token_expire_minutes)
         await self.session_service.deactivate_session(payload.session_uuid)
+
+    def validate_token(self, token: str) -> PayloadSchema:
+        payload: dict = get_payload_from_token(token)
+        print(payload)
+        return get_user_from_payload(payload)

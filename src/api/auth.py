@@ -58,7 +58,16 @@ async def signout(
 @router.get("/validate")
 async def validate(accessToken: str):
     """Интроспекция токена"""
-    pass
+    try:
+        return AuthService().validate_token(accessToken)
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed signout"
+        )
+
 
 
 @router.post("/refresh")
