@@ -17,3 +17,13 @@ class UserAlreadyExistsException(APIException):
 class UnauthorizedUserException(APIException):
     status_code = status.HTTP_403_FORBIDDEN
     detail="No rights to perform this action"
+
+
+class InvalidTokenException(APIException):
+    status_code = status.HTTP_401_UNAUTHORIZED
+    detail="Invalid token error"
+
+
+class TokenExpiredException(APIException):
+    status_code = status.HTTP_403_FORBIDDEN
+    detail = "Token has expired"
