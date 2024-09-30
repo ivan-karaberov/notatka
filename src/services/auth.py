@@ -9,7 +9,7 @@ from repositories.user import UserRepository
 from repositories.session import SessionRepository
 from errors.api_errors import UnauthorizedUserException, InvalidRefreshTokenException
 from utils.auth import generate_auth_token_pair, get_payload_from_token, \
-                        get_user_from_payload
+                        get_user_from_payload, validate_password
 from core.config import settings
 from core.redis.redis_helper import jwt_black_list
 
@@ -22,6 +22,9 @@ class AuthService:
         """Генерирует пару токенов и создает запись об открытии сессии"""
         user = await self.user_service.get_user_by_username(signin_data.username)
         if (not user) or (user.is_active is False):
+            raise UnauthorizedUserException
+
+        if not validate_password(signin_data.password, user.hashed_password):
             raise UnauthorizedUserException
 
         session_uuid = str(uuid.uuid4())
