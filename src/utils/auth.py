@@ -42,6 +42,7 @@ def decode_jwt(
         algorithms=algoritm
     )
 
+
 def hash_password(password: str, rounds: int = 12) -> bytes:
     return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds))
 

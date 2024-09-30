@@ -10,6 +10,7 @@ class Session(Base):
         primary_key=True,
         autoincrement=True
     )
+    session_uuid: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     user_id: Mapped[int] = mapped_column(
         Integer,
         ForeignKey('users.id'),

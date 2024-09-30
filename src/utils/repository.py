@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, update
 
 from core.db.db_helper import db_helper
 
@@ -16,6 +16,10 @@ class AbstractRepository(ABC):
 
     @abstractmethod
     async def fetch_all(**filters):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def update(id:int, **filters):
         raise NotImplementedError
 
 
@@ -44,3 +48,13 @@ class SQLAlchemyRepository(AbstractRepository):
                     stmt = stmt.filter(getattr(self.model, key) == value)
             res = await session.execute(stmt)
             return res.scalars().all()
+
+    async def update(self, id: int, **filters):
+        async with db_helper.session_factory() as session:
+            stmt = (
+                update(self.model).
+                filter_by(id=id).
+                values(**filters)
+            )
+            await session.execute(stmt)
+            await session.commit()

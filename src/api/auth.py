@@ -1,11 +1,12 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status, HTTPException, Depends
 
 from schemas.auth import SignUpSchema, SignInSchema, TokenPairSchema, \
-                            RefreshTokenSchema
+                            RefreshTokenSchema, PayloadSchema
 from services.user import UserService
 from services.auth import AuthService
 from repositories.user import UserRepository
 from errors.api_errors import APIException
+from dependencies.auth import get_current_auth_user
 
 router = APIRouter()
 
@@ -38,10 +39,20 @@ async def signin(signin_data: SignInSchema):
             )
 
 
-@router.put("/signout")
-async def signout():
+@router.put("/signout", status_code=status.HTTP_204_NO_CONTENT)
+async def signout(
+    payload: PayloadSchema = Depends(get_current_auth_user)
+):
     """Выход из аккаунта"""
-    pass
+    try:
+        return await AuthService().signout(payload)
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed signout"
+            )
 
 
 @router.get("/validate")
