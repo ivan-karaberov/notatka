@@ -1,6 +1,6 @@
 from models.user import User
 from schemas.auth import SignUpSchema
-from schemas.account import AccountDetailSchema
+from schemas.account import AccountDetailSchema, UpdateAccountSchema
 from errors.api_errors import UserAlreadyExistsException
 from utils.auth import hash_password
 from utils.repository import AbstractRepository
@@ -26,6 +26,14 @@ class UserService:
         )
 
         return await self.user_repo.add_one(user)
+
+    async def update_user(self, id: int, update_data: UpdateAccountSchema):
+        await self.user_repo.update(
+            id=id,
+            firstName=update_data.firstName,
+            lastName=update_data.lastName,
+            hashed_password=hash_password(update_data.password)
+        )
 
     async def get_user_by_username(self, username: str):
         """Получает пользователя из бд"""

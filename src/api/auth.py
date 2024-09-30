@@ -45,7 +45,7 @@ async def signout(
 ):
     """Выход из аккаунта"""
     try:
-        return await AuthService().signout(payload)
+        await AuthService().signout(payload)
     except APIException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
     except Exception:

@@ -13,3 +13,9 @@ class AccountDetailSchema(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime]
     is_active: bool
+
+
+class UpdateAccountSchema(BaseModel):
+    lastName: Annotated[str, Field(max_length=50)]
+    firstName: Annotated[str, Field(max_length=50)]
+    password: str
