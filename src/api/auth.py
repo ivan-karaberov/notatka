@@ -55,7 +55,7 @@ async def signout(
             )
 
 
-@router.get("/validate")
+@router.get("/validate", response_model=PayloadSchema)
 async def validate(accessToken: str):
     """Интроспекция токена"""
     try:
@@ -70,7 +70,7 @@ async def validate(accessToken: str):
 
 
 
-@router.post("/refresh")
+@router.post("/refresh", response_model=TokenPairSchema)
 async def refresh(refreshToken: RefreshTokenSchema):
     """Обновление пары токенов"""
     try:

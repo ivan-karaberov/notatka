@@ -27,7 +27,7 @@ class RefreshTokenSchema(BaseModel):
 
 class PayloadSchema(BaseModel):
     sub: int
-    role: str
+    role: Annotated[str, Field(max_length=8)]
     session_uuid: str
     is_refresh: bool
 

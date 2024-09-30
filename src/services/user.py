@@ -1,5 +1,6 @@
 from models.user import User
 from schemas.auth import SignUpSchema
+from schemas.account import AccountDetailSchema
 from errors.api_errors import UserAlreadyExistsException
 from utils.auth import hash_password
 from utils.repository import AbstractRepository
@@ -29,3 +30,17 @@ class UserService:
     async def get_user_by_username(self, username: str):
         """Получает пользователя из бд"""
         return await self.user_repo.fetch_one(username=username)
+
+    async def get_user_by_id(self, id: int) -> AccountDetailSchema | None:
+        if user := await self.user_repo.fetch_one(id=id):
+            account = AccountDetailSchema(
+                id=user.id,
+                firstName=user.firstName,
+                lastName=user.lastName,
+                username=user.username,
+                role=user.role,
+                created_at=user.created_at,
+                updated_at=user.updated_at,
+                is_active=user.is_active
+            )
+            return account
