@@ -2,9 +2,12 @@ from datetime import datetime, timedelta
 
 import jwt
 import bcrypt
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 from core.config import settings
+from core.redis.redis_helper import jwt_black_list
 from schemas.auth import PayloadSchema, TokenPairSchema
+from errors.api_errors import TokenExpiredException, InvalidTokenException
 
 
 def encode_jwt(
@@ -69,4 +72,32 @@ def generate_auth_token_pair(payload: PayloadSchema):
     return TokenPairSchema(
         access_token=access_token,
         refresh_token=refresh_token
+    )
+
+def get_payload_from_token(token: str) -> dict:
+    """Извлекает payload из токена"""
+    try:
+        return decode_jwt(token=token)
+    except ExpiredSignatureError:
+        raise TokenExpiredException
+    except InvalidTokenError:
+        raise InvalidTokenException
+
+
+def get_user_from_payload(payload: dict) -> PayloadSchema:
+    sub = payload.get("sub")
+    role = payload.get("role")
+    session_uuid = payload.get("session_uuid")
+
+    if (sub is None) or (role is None) or (session_uuid is None):
+        raise InvalidTokenException
+
+
+    if jwt_black_list.get(session_uuid):
+        raise InvalidTokenException
+
+    return PayloadSchema(
+        sub=sub,
+        role=role,
+        session_uuid=session_uuid
     )
