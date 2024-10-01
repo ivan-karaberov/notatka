@@ -25,7 +25,7 @@ async def get_me(payload: PayloadSchema = Depends(get_current_auth_user)):
         )
 
 
-@router.put("update", status_code=status.HTTP_204_NO_CONTENT)
+@router.put("/update", status_code=status.HTTP_204_NO_CONTENT)
 async def update_account(
     update_data: UpdateAccountSchema,
     payload: PayloadSchema = Depends(get_current_auth_user)

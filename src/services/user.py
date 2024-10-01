@@ -31,8 +31,7 @@ class UserService:
         await self.user_repo.update(
             id=id,
             firstName=update_data.firstName,
-            lastName=update_data.lastName,
-            hashed_password=hash_password(update_data.password)
+            lastName=update_data.lastName
         )
 
     async def get_user_by_username(self, username: str):
