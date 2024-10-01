@@ -1,8 +1,9 @@
 from models.user import User
 from schemas.auth import SignUpSchema
-from schemas.account import AccountDetailSchema, UpdateAccountSchema
-from errors.api_errors import UserAlreadyExistsException
-from utils.auth import hash_password
+from schemas.account import AccountDetailSchema, UpdateAccountSchema, \
+                            UpdatePasswordSchema
+from errors.api_errors import UserAlreadyExistsException, UnauthorizedUserException
+from utils.auth import hash_password, validate_password
 from utils.repository import AbstractRepository
 
 
@@ -34,12 +35,28 @@ class UserService:
             lastName=update_data.lastName
         )
 
+    async def update_password(self, id: int, update_data: UpdatePasswordSchema):
+        user = await self.get_user_by_id(id)
+        if not validate_password(
+            password=update_data.old_password,
+            hashed_password=user.hashed_password
+        ):
+            raise UnauthorizedUserException
+
+        await self.user_repo.update(
+            id=id,
+            hashed_password=hash_password(update_data.new_password)
+        )
+
     async def get_user_by_username(self, username: str):
         """Получает пользователя из бд"""
         return await self.user_repo.fetch_one(username=username)
 
-    async def get_user_by_id(self, id: int) -> AccountDetailSchema | None:
-        if user := await self.user_repo.fetch_one(id=id):
+    async def get_user_by_id(self, id: int):
+        return  await self.user_repo.fetch_one(id=id)
+
+    async def get_formatted_user_by_id(self, id: int) -> AccountDetailSchema | None:
+        if user := await self.get_user_by_id(id=id):
             account = AccountDetailSchema(
                 id=user.id,
                 firstName=user.firstName,

@@ -18,3 +18,8 @@ class AccountDetailSchema(BaseModel):
 class UpdateAccountSchema(BaseModel):
     lastName: Annotated[str, Field(max_length=50)]
     firstName: Annotated[str, Field(max_length=50)]
+
+
+class UpdatePasswordSchema(BaseModel):
+    old_password: str
+    new_password: str
