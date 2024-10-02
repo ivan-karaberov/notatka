@@ -106,6 +106,7 @@ class AuthService:
 
 
     async def get_user_from_payload(self, payload: dict, refresh=False) -> PayloadSchema:
+        """Извлекает полезную нагрузку из payload"""
         sub = payload.get("sub")
         role = payload.get("role")
         session_uuid = payload.get("session_uuid")

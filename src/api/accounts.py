@@ -9,8 +9,7 @@ from errors.api_errors import APIException
 from services.user import UserService
 from services.auth import AuthService
 from repositories.user import UserRepository
-from schemas.account import AccountDetailSchema, UpdateAccountSchema, \
-                        UpdatePasswordSchema, AllAccountsSchema
+from schemas.account import *
 
 router = APIRouter()
 
@@ -102,3 +101,21 @@ async def soft_delete_account(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed delete account"
         )
+
+
+@router.post("/new", status_code=status.HTTP_204_NO_CONTENT)
+async def admin_create_account(
+    user: AdminCreateAccountSchema,
+    payload: PayloadSchema = Depends(get_current_auth_user)
+):
+    """Создание аккаунта администратором"""
+    try:
+        await UserService(UserRepository).admin_create_account(user, payload.role)
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed create account"
+        )
+

@@ -3,6 +3,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from .auth import SignUpSchema
+
 
 class AccountDetailSchema(BaseModel):
     id: int
@@ -28,3 +30,7 @@ class UpdateAccountSchema(BaseModel):
 class UpdatePasswordSchema(BaseModel):
     old_password: str
     new_password: str
+
+
+class AdminCreateAccountSchema(SignUpSchema):
+    role: Annotated[str, Field(max_length=8)]

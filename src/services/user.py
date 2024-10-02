@@ -1,12 +1,10 @@
 from models.user import User
 from schemas.auth import SignUpSchema
-from schemas.account import AccountDetailSchema, UpdateAccountSchema, \
-                            UpdatePasswordSchema, AllAccountsSchema
+from schemas.account import *
 from errors.api_errors import UserAlreadyExistsException, UnauthorizedUserException
 from utils.auth import hash_password, validate_password
 from utils.repository import AbstractRepository
-from services.session import SessionService
-from repositories.session import SessionRepository
+
 
 class UserService:
     def __init__(self, user_repo: AbstractRepository) -> None:
@@ -28,6 +26,15 @@ class UserService:
         )
 
         return await self.user_repo.add_one(user)
+
+    async def admin_create_account(
+        self, user: AdminCreateAccountSchema, user_role: str
+    ):
+        if user_role != "Admin":
+            raise UnauthorizedUserException
+
+        signup_data = SignUpSchema(**user.__dict__)
+        await self.create_user(signup_data, role_name=user.role)
 
     async def update_user(self, id: int, update_data: UpdateAccountSchema):
         await self.user_repo.update(
