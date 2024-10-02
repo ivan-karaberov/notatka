@@ -76,7 +76,8 @@ async def get_all_accounts(
     try:
         return await UserService(UserRepository).get_all_accounts(
             page=page,
-            page_size=page_size
+            page_size=page_size,
+            role=payload.role
         )
     except APIException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
@@ -96,8 +97,7 @@ async def soft_delete_account(
         await AuthService().soft_delete_account(payload)
     except APIException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
-    except Exception as e:
-        print(e)
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed delete account"

@@ -65,9 +65,13 @@ class UserService:
     async def get_all_accounts(
         self,
         page: int,
-        page_size: int
+        page_size: int,
+        role: str
     ) -> list[AccountDetailSchema]:
         """Получает все зарегестрированные аккаунты"""
+        if role != "Admin":
+            raise UnauthorizedUserException
+    
         total_pages, accounts = await self.user_repo.fetch_paginated(
             page=page,
             page_size=page_size,
