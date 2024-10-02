@@ -5,7 +5,8 @@ from schemas.account import AccountDetailSchema, UpdateAccountSchema, \
 from errors.api_errors import UserAlreadyExistsException, UnauthorizedUserException
 from utils.auth import hash_password, validate_password
 from utils.repository import AbstractRepository
-
+from services.session import SessionService
+from repositories.session import SessionRepository
 
 class UserService:
     def __init__(self, user_repo: AbstractRepository) -> None:
@@ -75,3 +76,8 @@ class UserService:
             accounts=[AccountDetailSchema(**account.__dict__) for account in accounts],
             total_pages=total_pages
         )
+
+    async def deactivate_account(self, id: int):
+        """Деактивация аккаунта"""
+        await self.user_repo.update(id=id, is_active=False)
+        

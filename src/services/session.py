@@ -1,3 +1,5 @@
+from typing import List
+
 from datetime import datetime
 
 from utils.repository import AbstractRepository
@@ -26,6 +28,8 @@ class SessionService:
         await self.session_repo.update(session.id, is_deactivated=True)
         return True
 
+    async def deactivate_sessions(self, id: list[int]):
+        await self.session_repo.update_multiply(id, is_deactivated=True)
 
     async def get_session_by_uuid(self, session_uuid: str):
         return await self.session_repo.fetch_one(session_uuid=session_uuid)
@@ -40,4 +44,12 @@ class SessionService:
             id=session_id,
             refresh_token=refresh_token,
             expires_at=expires_at
+        )
+    
+    async def get_all_active_sessions(self, id: int) -> List[SessionSchema]:
+        """Получает все активные сессии для заданного пользователя"""
+        return await self.session_repo.fetch_all(
+            id=id,
+            is_deactivated=False,
+            expires_at=datetime.now()
         )

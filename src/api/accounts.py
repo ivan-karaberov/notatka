@@ -7,6 +7,7 @@ from schemas.auth import PayloadSchema
 from dependencies.auth import get_current_auth_user
 from errors.api_errors import APIException
 from services.user import UserService
+from services.auth import AuthService
 from repositories.user import UserRepository
 from schemas.account import AccountDetailSchema, UpdateAccountSchema, \
                         UpdatePasswordSchema, AllAccountsSchema
@@ -92,11 +93,12 @@ async def soft_delete_account(
 ):
     """Мягкое удаление аккаунта"""
     try:
-        pass
+        await AuthService().soft_delete_account(payload)
     except APIException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
-    except Exception:
+    except Exception as e:
+        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed update password"
+            detail="Failed delete account"
         )

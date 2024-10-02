@@ -84,6 +84,17 @@ class AuthService:
         payload: dict = self.get_payload_from_token(token)
         return await self.get_user_from_payload(payload)
 
+    async def soft_delete_account(self, payload: PayloadSchema):
+        sessions = await self.session_service.get_all_active_sessions(payload.sub)
+        
+        sessions_id = [session.id for session in sessions]
+
+        print(sessions_id, payload.sub)
+
+        await self.session_service.deactivate_sessions(sessions_id)
+        await self.user_service.deactivate_account(payload.sub)
+
+
     def get_payload_from_token(self, token: str) -> dict:
         """Извлекает payload из токена"""
         try:

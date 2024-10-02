@@ -26,6 +26,10 @@ class AbstractRepository(ABC):
     async def update(id:int, **filters):
         raise NotImplementedError
 
+    @abstractmethod
+    async def update_multiply(id: list[int], **filters):
+        raise NotImplementedError
+
 
 class SQLAlchemyRepository(AbstractRepository):
     model = None
@@ -76,6 +80,16 @@ class SQLAlchemyRepository(AbstractRepository):
             stmt = (
                 update(self.model).
                 filter_by(id=id).
+                values(**filters)
+            )
+            await session.execute(stmt)
+            await session.commit()
+
+    async def update_multiply(self, id: list[int], **filters):
+        async with db_helper.session_factory() as session:
+            stmt = (
+                update(self.model).
+                where(self.model.id.in_(id)).
                 values(**filters)
             )
             await session.execute(stmt)
