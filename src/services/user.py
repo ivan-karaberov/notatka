@@ -30,6 +30,7 @@ class UserService:
     async def admin_create_account(
         self, user: AdminCreateAccountSchema, user_role: str
     ):
+        """Создает пользователя в бд с заданной ролью"""
         if user_role != "Admin":
             raise UnauthorizedUserException
 
@@ -37,6 +38,7 @@ class UserService:
         await self.create_user(signup_data, role_name=user.role)
 
     async def update_user(self, id: int, update_data: UpdateAccountSchema):
+        """Обновляет пользователя в бд"""
         await self.user_repo.update(
             id=id,
             firstName=update_data.firstName,
@@ -44,6 +46,7 @@ class UserService:
         )
 
     async def update_password(self, id: int, update_data: UpdatePasswordSchema):
+        """Обновляет пароль пользователя в бд"""
         user = await self.get_user_by_id(id)
         if not validate_password(
             password=update_data.old_password,

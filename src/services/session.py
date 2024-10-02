@@ -11,6 +11,7 @@ class SessionService:
         self.session_repo = session_repo()
 
     async def create_session(self, session_detail: SessionSchema):
+        """Создает запись о новой сессии"""
         session = Session(
             user_id=session_detail.user_id,
             refresh_token=session_detail.refresh_token,
@@ -20,6 +21,7 @@ class SessionService:
         return await self.session_repo.add_one(session)
 
     async def deactivate_session(self, session_uuid: str) -> bool:
+        """Закрывает сессию"""
         session = await self.get_session_by_uuid(session_uuid)
        
         if session is None or session.is_deactivated:
@@ -29,9 +31,11 @@ class SessionService:
         return True
 
     async def deactivate_sessions(self, id: list[int]):
+        """Закрывает список сессий"""
         await self.session_repo.update_multiply(id, is_deactivated=True)
 
     async def get_session_by_uuid(self, session_uuid: str):
+        """Получаеь uuid сессии"""
         return await self.session_repo.fetch_one(session_uuid=session_uuid)
 
     async def update_refresh_token(
@@ -40,6 +44,7 @@ class SessionService:
         refresh_token: str,
         expires_at: datetime
     ):
+        """Обновляет ключ в сессии"""
         await self.session_repo.update(
             id=session_id,
             refresh_token=refresh_token,
