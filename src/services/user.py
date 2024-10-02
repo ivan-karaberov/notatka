@@ -1,7 +1,7 @@
 from models.user import User
 from schemas.auth import SignUpSchema
 from schemas.account import AccountDetailSchema, UpdateAccountSchema, \
-                            UpdatePasswordSchema
+                            UpdatePasswordSchema, AllAccountsSchema
 from errors.api_errors import UserAlreadyExistsException, UnauthorizedUserException
 from utils.auth import hash_password, validate_password
 from utils.repository import AbstractRepository
@@ -53,18 +53,25 @@ class UserService:
         return await self.user_repo.fetch_one(username=username)
 
     async def get_user_by_id(self, id: int):
+        """Получает пользователя по id"""
         return  await self.user_repo.fetch_one(id=id)
 
     async def get_formatted_user_by_id(self, id: int) -> AccountDetailSchema | None:
+        """Получает пользователя в преобразованом формате"""
         if user := await self.get_user_by_id(id=id):
-            account = AccountDetailSchema(
-                id=user.id,
-                firstName=user.firstName,
-                lastName=user.lastName,
-                username=user.username,
-                role=user.role,
-                created_at=user.created_at,
-                updated_at=user.updated_at,
-                is_active=user.is_active
-            )
-            return account
+            return AccountDetailSchema(**user.__dict__)
+
+    async def get_all_accounts(
+        self,
+        page: int,
+        page_size: int
+    ) -> list[AccountDetailSchema]:
+        """Получает все зарегестрированные аккаунты"""
+        total_pages, accounts = await self.user_repo.fetch_paginated(
+            page=page,
+            page_size=page_size,
+        )
+        return AllAccountsSchema(
+            accounts=[AccountDetailSchema(**account.__dict__) for account in accounts],
+            total_pages=total_pages
+        )

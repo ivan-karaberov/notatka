@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import select, update, func
 
 from core.db.db_helper import db_helper
 
@@ -16,6 +16,10 @@ class AbstractRepository(ABC):
 
     @abstractmethod
     async def fetch_all(**filters):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def fetch_paginated(self, page: int, page_size: int, **filters):
         raise NotImplementedError
 
     @abstractmethod
@@ -48,6 +52,24 @@ class SQLAlchemyRepository(AbstractRepository):
                     stmt = stmt.filter(getattr(self.model, key) == value)
             res = await session.execute(stmt)
             return res.scalars().all()
+    
+    async def fetch_paginated(self, page: int, page_size: int, **filters):
+        async with db_helper.session_factory() as session:
+            total = await session.execute(
+                select(func.count(self.model.id)).filter_by(**filters)
+            )
+            total = total.scalar() or 0
+            total_page = (total // page_size) + (1 if total % page_size > 0 else 0)
+            offset = (page-1)*page_size
+            stmt = (
+                select(self.model).
+                filter_by(**filters).
+                order_by(self.model.created_at.desc()).
+                offset(offset).
+                limit(page_size)
+            )
+            res = await session.execute(stmt)
+            return total_page, res.scalars().all()
 
     async def update(self, id: int, **filters):
         async with db_helper.session_factory() as session:

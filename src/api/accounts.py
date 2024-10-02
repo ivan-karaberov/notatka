@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, status
+from typing import List, Annotated
+
+from fastapi import APIRouter, Depends, status, Query
 from fastapi.exceptions import HTTPException
 
 from schemas.auth import PayloadSchema
@@ -7,7 +9,7 @@ from errors.api_errors import APIException
 from services.user import UserService
 from repositories.user import UserRepository
 from schemas.account import AccountDetailSchema, UpdateAccountSchema, \
-                        UpdatePasswordSchema
+                        UpdatePasswordSchema, AllAccountsSchema
 
 router = APIRouter()
 
@@ -54,6 +56,43 @@ async def update_password(
             id=payload.sub,
             update_data=update_password_data
         )
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed update password"
+        )
+
+
+@router.get("/accounts", response_model=AllAccountsSchema)
+async def get_all_accounts(
+    page: Annotated[int, Query(ge=1)],
+    page_size: Annotated[int, Query(ge=1, le=100)],
+    payload: PayloadSchema = Depends(get_current_auth_user)
+):
+    """Получение всех аккаунтов"""
+    try:
+        return await UserService(UserRepository).get_all_accounts(
+            page=page,
+            page_size=page_size
+        )
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed get accounts"
+        )
+
+
+@router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
+async def soft_delete_account(
+    payload: PayloadSchema = Depends(get_current_auth_user)
+):
+    """Мягкое удаление аккаунта"""
+    try:
+        pass
     except APIException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
     except Exception:

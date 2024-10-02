@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated, Optional, List
 from datetime import datetime
 
 from pydantic import BaseModel, Field
@@ -13,6 +13,11 @@ class AccountDetailSchema(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime]
     is_active: bool
+
+
+class AllAccountsSchema(BaseModel):
+    accounts: List[AccountDetailSchema]
+    total_pages: int
 
 
 class UpdateAccountSchema(BaseModel):
