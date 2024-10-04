@@ -59,7 +59,7 @@ async def signout(
 async def validate(accessToken: str):
     """Интроспекция токена"""
     try:
-        return AuthService().validate_token(accessToken)
+        return await AuthService().validate_token(accessToken)
     except APIException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
     except Exception:
