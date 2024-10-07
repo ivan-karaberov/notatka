@@ -1,7 +1,8 @@
 from models.user import User
 from schemas.auth import SignUpSchema
 from schemas.account import *
-from errors.api_errors import UserAlreadyExistsException, UnauthorizedUserException
+from errors.api_errors import UserAlreadyExistsException, \
+                    UnauthorizedUserException, UsernameAlreadyExistsException
 from utils.auth import hash_password, validate_password
 from utils.repository import AbstractRepository
 
@@ -43,6 +44,17 @@ class UserService:
             id=id,
             firstName=update_data.firstName,
             lastName=update_data.lastName
+        )
+
+    async def update_username(self, id: int, update_username: str):
+        """Обновляет username пользователя в бд"""
+        user = await self.get_user_by_username(update_username)
+        if user:
+            raise UsernameAlreadyExistsException
+        
+        await self.user_repo.update(
+            id=id,
+            username=update_username
         )
 
     async def update_password(self, id: int, update_data: UpdatePasswordSchema):

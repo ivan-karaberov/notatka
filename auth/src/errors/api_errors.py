@@ -14,6 +14,11 @@ class UserAlreadyExistsException(APIException):
     detail="User already exists."
 
 
+class UsernameAlreadyExistsException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail="Username already exists."
+
+
 class UnauthorizedUserException(APIException):
     status_code = status.HTTP_403_FORBIDDEN
     detail="No rights to perform this action"

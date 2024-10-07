@@ -1,6 +1,6 @@
 from typing import List, Annotated
 
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, status, Query, Body
 from fastapi.exceptions import HTTPException
 
 from schemas.auth import PayloadSchema
@@ -42,6 +42,23 @@ async def update_account(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed update account"
+        )
+
+
+@router.put("/update_username", status_code=status.HTTP_204_NO_CONTENT)
+async def update_username(
+    update_username: str = Body(embed=True),
+    payload: PayloadSchema = Depends(get_current_auth_user)
+):
+    """Обновление своего ника"""
+    try:
+        await UserService(UserRepository).update_username(payload.sub, update_username)
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed update username"
         )
 
 
