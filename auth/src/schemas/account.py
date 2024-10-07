@@ -1,7 +1,7 @@
 from typing import Annotated, Optional, List
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from .auth import SignUpSchema
 
@@ -16,6 +16,9 @@ class AccountDetailSchema(BaseModel):
     updated_at: Optional[datetime]
     is_active: bool
 
+    @validator('username')
+    def lowercase_username(cls, v):
+        return v.lower()
 
 class AllAccountsSchema(BaseModel):
     accounts: List[AccountDetailSchema]

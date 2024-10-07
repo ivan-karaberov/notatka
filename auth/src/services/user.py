@@ -48,6 +48,8 @@ class UserService:
 
     async def update_username(self, id: int, update_username: str):
         """Обновляет username пользователя в бд"""
+        update_username = update_username.lower()
+
         user = await self.get_user_by_username(update_username)
         if user:
             raise UsernameAlreadyExistsException
@@ -73,7 +75,7 @@ class UserService:
 
     async def get_user_by_username(self, username: str):
         """Получает пользователя из бд"""
-        return await self.user_repo.fetch_one(username=username)
+        return await self.user_repo.fetch_one(username=username.lower())
 
     async def get_user_by_id(self, id: int):
         """Получает пользователя по id"""
