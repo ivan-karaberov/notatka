@@ -1,19 +1,25 @@
 from typing import Annotated
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
-class SignUpSchema(BaseModel):
+class BaseSignSchema(BaseModel):
+    username: Annotated[str, Field(max_length=32)]
+    password: str
+
+    @validator('username')
+    def lowercase_username(cls, v):
+        return v.lower()
+
+
+class SignUpSchema(BaseSignSchema):
     lastName: Annotated[str, Field(max_length=50)]
     firstName: Annotated[str, Field(max_length=50)]
-    username: Annotated[str, Field(max_length=32)]
-    password: str
 
 
-class SignInSchema(BaseModel):
-    username: Annotated[str, Field(max_length=32)]
-    password: str
+class SignInSchema(BaseSignSchema):
+    pass
 
 
 class TokenPairSchema(BaseModel):
