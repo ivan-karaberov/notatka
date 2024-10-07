@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "account-microservice"
+version = "0.1.0"
+description = ""
+authors = ["ivan-karaberov <karaberov.ivan@yandex.ru>"]
+readme = "README.md"
+packages = [{include = "account_microservice"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standart"], version = "^0.30.6"}
+sqlalchemy = "^2.0.35"
+alembic = {extras = ["async"], version = "^1.13.2"}
+black = "^24.8.0"
+pydantic-settings = "^2.5.2"
+asyncpg = "^0.29.0"
+bcrypt = "^4.2.0"
+pyjwt = {extras = ["crypto"], version = "^2.9.0"}
+redis = "^5.1.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
