@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "notification-microservice"
+version = "0.1.0"
+description = ""
+authors = ["ivan-karaberov"]
+readme = "README.md"
+packages = [{include = "notification_microservice"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic-settings = "^2.5.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
