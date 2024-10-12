@@ -20,6 +20,7 @@ class AccountDetailSchema(BaseModel):
     def lowercase_username(cls, v):
         return v.lower()
 
+
 class AllAccountsSchema(BaseModel):
     accounts: List[AccountDetailSchema]
     total_pages: int
