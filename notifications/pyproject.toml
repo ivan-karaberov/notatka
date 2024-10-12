@@ -10,6 +10,7 @@ packages = [{include = "notification_microservice"}]
 python = "^3.10"
 pydantic-settings = "^2.5.2"
 aiokafka = "^0.11.0"
+aiosmtplib = "^3.0.2"
 
 
 [build-system]
