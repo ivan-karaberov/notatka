@@ -13,7 +13,7 @@ from errors.api_errors import UnauthorizedUserException, \
     InvalidRefreshTokenException, InvalidTokenException, TokenExpiredException
 from utils.auth import generate_auth_token_pair, validate_password
 from core.config import settings
-from core.redis.redis_helper import jwt_black_list
+from core.redis.redis_helper import redis_helper
 from utils.auth import decode_jwt
 
 class AuthService:
@@ -53,7 +53,11 @@ class AuthService:
 
     async def signout(self, payload: PayloadSchema):
         """Закрывает сессию и добавляет токен в черный список"""
-        jwt_black_list.set(payload.session_uuid, payload.sub, ex=settings.auth_jwt.access_token_expire_minutes*60)
+        await redis_helper.add_token_to_black_list(
+            key=payload.session_uuid,
+            val=payload.sub,
+            expiration=settings.auth_jwt.access_token_expire_minutes*60
+        )
         await self.session_service.deactivate_session(payload.session_uuid)
 
     async def refresh_token(self, refresh_token: RefreshTokenSchema) -> TokenPairSchema:
@@ -117,7 +121,8 @@ class AuthService:
 
         user = await self.user_service.get_user_by_id(sub)
 
-        if jwt_black_list.get(session_uuid) or (not user.is_active):
+        token = await redis_helper.get_token_from_black_list(session_uuid)
+        if token or (not user.is_active):
             raise InvalidTokenException
 
         # Если мы ожидали accessToken а нам передали refreshToken

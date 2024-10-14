@@ -1,4 +1,4 @@
-from typing import List, Annotated
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, status, Query, Body
 from fastapi.exceptions import HTTPException
@@ -140,7 +140,7 @@ async def admin_create_account(
         )
 
 
-@router.post("/add_email")
+@router.post("/add_email", status_code=status.HTTP_204_NO_CONTENT)
 async def add_email(
     email: EmailStr = Body(embed=True),
     payload: PayloadSchema = Depends(get_current_auth_user)
@@ -153,25 +153,25 @@ async def add_email(
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed add email"
+            detail="Failed add email"
         )
 
 
-@router.post(f"/{MessageType.confirmation_email.value}")
-async def confirmation_email(email: EmailStr, confirmation_code: str):
+@router.post(f"/{MessageType.confirmation_email.value}", status_code=status.HTTP_204_NO_CONTENT)
+async def confirmation_email(email: EmailStr, token: str):
     """Подтверждение email"""
     try:
-        await UserService(UserRepository).confirmation_email(email, confirmation_code)
+        await UserService(UserRepository).confirmation_email(email, token)
     except APIException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed confirmation email"
+            detail="Failed confirmation email"
         )
 
 
-@router.delete("/email")
+@router.delete("/email", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_email(
     payload: PayloadSchema = Depends(get_current_auth_user)
 ):
@@ -180,8 +180,43 @@ async def delete_email(
         await EmailService(UserEmailRepository).delete_email(payload.sub)
     except APIException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed delete email"
+            detail="Failed delete email"
+        )
+
+
+@router.post("/forgot_password", status_code=status.HTTP_204_NO_CONTENT)
+async def forgot_reset(
+    email: EmailStr
+):
+    """Создание заявки на восстановление пароля"""
+    try:
+        await UserService(UserRepository).forgot_password(email)
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Password reset failed"
+        )
+
+
+@router.post("/reset_password", status_code=status.HTTP_204_NO_CONTENT)
+async def reset_password(reset_password: ResetPasswordSchema):
+    """Обновление пароля"""
+    try:
+        await UserService(UserRepository).reset_password(
+            email=reset_password.email,
+            password=reset_password.password,
+            token=reset_password.token
+        )
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Password reset failed"
         )

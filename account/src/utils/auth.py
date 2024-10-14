@@ -5,7 +5,6 @@ import jwt
 import bcrypt
 
 from core.config import settings
-from core.redis.redis_helper import jwt_black_list
 from schemas.auth import PayloadSchema, TokenPairSchema
 
 

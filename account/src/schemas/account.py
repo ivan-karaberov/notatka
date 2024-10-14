@@ -2,7 +2,7 @@ from typing import Annotated, Optional, List
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, EmailStr, Field, validator
 
 from .auth import SignUpSchema
 
@@ -34,7 +34,7 @@ class UpdateAccountSchema(BaseModel):
 
 class UpdatePasswordSchema(BaseModel):
     old_password: str
-    new_password: str
+    new_password: Annotated[str, Field(min_length=6)]
 
 
 class AdminCreateAccountSchema(SignUpSchema):
@@ -51,3 +51,9 @@ class ConfirmationCodeMessageSchema(BaseModel):
     recipient_name: str
     message: str
     message_type: str
+
+
+class ResetPasswordSchema(BaseModel):
+    email: EmailStr
+    password: Annotated[str, Field(min_length=6)]
+    token: str

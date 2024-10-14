@@ -7,7 +7,7 @@ from errors.api_errors import *
 from utils.auth import hash_password, validate_password
 from utils.repository import AbstractRepository
 from core.config import settings
-from core.redis.redis_helper import confirmations_codes
+from core.redis.redis_helper import redis_helper
 from services.email import EmailService
 from repositories.email import UserEmailRepository
 from services.notifications import NotificationService
@@ -120,16 +120,19 @@ class UserService:
         """Добавляет email пользователю и отправляет ссылку подтверждения"""
         user_taken = await self.email_service.get_by_user_id(user_id)
         email_taken = await self.email_service.get_by_email(email)
+        message_type = MessageType.confirmation_email
 
         if not user_taken and not email_taken:
             await self.email_service.add_email(user_id, email)
-            await self.__generate_code_and_send_email(user_id, email)
+            await self.__generate_code_and_send_email(user_id, email, message_type)
             return
 
-        key = f"{MessageType.confirmation_email.value}:{email}"
-        redis_taken = confirmations_codes.get(key)
+        redis_taken = await redis_helper.get_email_confirmation_code(
+            key=email,
+            category=message_type.value
+        )
         if not user_taken.is_confirmed and not redis_taken:
-            await self.__generate_code_and_send_email(user_id, user_taken.email)
+            await self.__generate_code_and_send_email(user_id, user_taken.email, message_type)
             return
         
         if redis_taken:
@@ -142,19 +145,21 @@ class UserService:
             raise EmailAlreadyExistsException
 
 
-    async def __generate_code_and_send_email(self, user_id: int, email: str):
+    async def __generate_code_and_send_email(
+        self, user_id: int, email: str, message_type: MessageType
+    ):
         """Генерирует код подтверждения и отправляет сообщение на почту"""
-        key = f"{MessageType.confirmation_email.value}:{email}"
-        confirmation_code = str(uuid.uuid4())
-        confirmations_codes.set(
-            name=key,
-            value=confirmation_code,
-            ex=settings.app.confirmation_code_expire_minutes*60
+        token = str(uuid.uuid4())
+        await redis_helper.add_email_confirmation_code(
+            key=email,
+            category=message_type.value,
+            val=token,
+            expiration=settings.app.confirmation_code_expire_minutes*60
         )
-        await self.__send_сonfirmation_email(user_id, email, confirmation_code)
+        await self.__send_сonfirmation_email(user_id, email, token, message_type)
 
     async def __send_сonfirmation_email(
-        self, user_id: int, email: str, confirmation_code: str
+        self, user_id: int, email: str, token: str, message_type: MessageType
     ):
         """Формирует сообщение и отправляет его на почту"""
         user = await self.get_user_by_id(user_id)
@@ -163,21 +168,67 @@ class UserService:
         message = ConfirmationCodeMessageSchema(
             recipient=email,
             recipient_name=user.firstName,
-            message=f"{app_url}/{MessageType.confirmation_email.value}?email={email}&confirmation_code={confirmation_code}",
-            message_type=MessageType.confirmation_email.value
+            message=f"{app_url}/{message_type.value}?email={email}&token={token}",
+            message_type=message_type.value
         )
 
         async with NotificationService() as notification_service:
             await notification_service.send_message(message)
 
-    async def confirmation_email(self, email: str, confirmation_code: str):
+    async def confirmation_email(self, email: str, token: str):
         """Подтверждает email"""
-        key = f"{MessageType.confirmation_email.value}:{email}"
-        original_confirmation_code = confirmations_codes.get(key).decode('utf-8')
+        code = await redis_helper.get_email_confirmation_code(
+            key=email,
+            category=MessageType.confirmation_email.value
+        )
+        original_token = code.decode('utf-8')
         
-        if original_confirmation_code == confirmation_code:
+        if original_token == token:
             await self.email_service.confirm_email(email)
-            confirmations_codes.delete(key)
+            await redis_helper.delete_email_confirmation_code(
+                key=email,
+                category=MessageType.confirmation_email.value
+            )
             return True
         
+        raise ConfirmationCodeIncorrectException
+
+    async def forgot_password(self, email: str):
+        """Создает заявку на смену пароля"""
+        redis_taken = await redis_helper.get_email_confirmation_code(
+            key=email,
+            category=MessageType.password_recovery.value
+        )
+        if redis_taken:
+            raise ConfirmationCodeAlreadySentException
+
+        email_taken = await self.email_service.get_by_email(email)
+        if not email_taken or not email_taken.is_confirmed:
+            raise EmailNotFoundException
+        
+        await self.__generate_code_and_send_email(
+            user_id=email_taken.user_id,
+            email=email,
+            message_type=MessageType.password_recovery
+        )
+    
+    async def reset_password(self, email: str, password: str, token: str):
+        """Устанавливает новый пароль"""
+        email_taken = await self.email_service.get_by_email(email)
+        if not email_taken or not email_taken.is_confirmed:
+            raise EmailNotFoundException
+
+        code = await redis_helper.get_email_confirmation_code(
+            key=email,
+            category=MessageType.password_recovery.value
+        )
+
+        original_token = code.decode('utf-8')
+        if original_token == token:
+            await self.user_repo.update(
+                id=email_taken.user_id,
+                hashed_password=hash_password(password)
+            )
+            return True
+
         raise ConfirmationCodeIncorrectException
