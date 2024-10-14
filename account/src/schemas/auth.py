@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, validator
 
 class BaseSignSchema(BaseModel):
     username: Annotated[str, Field(max_length=32)]
-    password: str
+    password: Annotated[str, Field(min_length=6)]
 
     @validator('username')
     def lowercase_username(cls, v):
