@@ -2,6 +2,7 @@ from typing import List, Annotated
 
 from fastapi import APIRouter, Depends, status, Query, Body
 from fastapi.exceptions import HTTPException
+from pydantic import EmailStr
 
 from schemas.auth import PayloadSchema
 from dependencies.auth import get_current_auth_user
@@ -136,3 +137,33 @@ async def admin_create_account(
             detail="Failed create account"
         )
 
+
+@router.post("/add_email")
+async def add_email(
+    email: EmailStr = Body(embed=True),
+    payload: PayloadSchema = Depends(get_current_auth_user)
+):
+    """Добавление email к аккаунту"""
+    try:
+        await UserService(UserRepository).add_email(payload.sub, email)
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed add email"
+        )
+
+
+@router.post(f"/{MessageType.confirmation_email.value}")
+async def confirmation_email(email: EmailStr, confirmation_code: str):
+    """Подтверждение email"""
+    try:
+        await UserService(UserRepository).confirmation_email(email, confirmation_code)
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed confirmation email"
+        )

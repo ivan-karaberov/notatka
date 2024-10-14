@@ -38,7 +38,7 @@ class SQLAlchemyRepository(AbstractRepository):
         async with db_helper.session_factory() as session:
             session.add(model)
             await session.commit()
-            return True
+            return model.id
 
     async def fetch_one(self, **filters):
         async with db_helper.session_factory() as session:

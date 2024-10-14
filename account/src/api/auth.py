@@ -37,7 +37,7 @@ async def signin(signin_data: SignInSchema):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed signin"
-            )
+        )
 
 
 @router.put("/signout", status_code=status.HTTP_204_NO_CONTENT)
