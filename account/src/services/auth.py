@@ -112,8 +112,7 @@ class AuthService:
         session_uuid = payload.get("session_uuid")
         is_refresh = payload.get("is_refresh")
 
-        if (sub is None) or (role is None) or (session_uuid is None) or \
-            (is_refresh is None):
+        if not all([sub, role, session_uuid]) or is_refresh is None:
             raise InvalidTokenException
 
         user = await self.user_service.get_user_by_id(sub)
@@ -122,7 +121,7 @@ class AuthService:
             raise InvalidTokenException
 
         # Если мы ожидали accessToken а нам передали refreshToken
-        if not refresh and is_refresh:
+        if (not refresh) and is_refresh:
             raise InvalidTokenException
 
         return PayloadSchema(

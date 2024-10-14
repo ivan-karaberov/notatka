@@ -18,6 +18,8 @@ asyncpg = "^0.29.0"
 bcrypt = "^4.2.0"
 pyjwt = {extras = ["crypto"], version = "^2.9.0"}
 redis = "^5.1.0"
+pydantic = {extras = ["email"], version = "^2.9.2"}
+aiokafka = "^0.11.0"
 
 
 [build-system]

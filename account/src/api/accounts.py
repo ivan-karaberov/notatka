@@ -2,13 +2,16 @@ from typing import List, Annotated
 
 from fastapi import APIRouter, Depends, status, Query, Body
 from fastapi.exceptions import HTTPException
+from pydantic import EmailStr
 
 from schemas.auth import PayloadSchema
 from dependencies.auth import get_current_auth_user
 from errors.api_errors import APIException
 from services.user import UserService
 from services.auth import AuthService
+from services.email import EmailService
 from repositories.user import UserRepository
+from repositories.email import UserEmailRepository
 from schemas.account import *
 
 router = APIRouter()
@@ -136,3 +139,49 @@ async def admin_create_account(
             detail="Failed create account"
         )
 
+
+@router.post("/add_email")
+async def add_email(
+    email: EmailStr = Body(embed=True),
+    payload: PayloadSchema = Depends(get_current_auth_user)
+):
+    """Добавление email к аккаунту"""
+    try:
+        await UserService(UserRepository).add_email(payload.sub, email)
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed add email"
+        )
+
+
+@router.post(f"/{MessageType.confirmation_email.value}")
+async def confirmation_email(email: EmailStr, confirmation_code: str):
+    """Подтверждение email"""
+    try:
+        await UserService(UserRepository).confirmation_email(email, confirmation_code)
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed confirmation email"
+        )
+
+
+@router.delete("/email")
+async def delete_email(
+    payload: PayloadSchema = Depends(get_current_auth_user)
+):
+    """Удаляет email пользователя"""
+    try:
+        await EmailService(UserEmailRepository).delete_email(payload.sub)
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed delete email"
+        )

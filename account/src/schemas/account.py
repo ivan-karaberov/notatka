@@ -1,5 +1,6 @@
 from typing import Annotated, Optional, List
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel, Field, validator
 
@@ -38,3 +39,15 @@ class UpdatePasswordSchema(BaseModel):
 
 class AdminCreateAccountSchema(SignUpSchema):
     role: Annotated[str, Field(max_length=8)]
+
+
+class MessageType(Enum):
+    confirmation_email = "confirmation_email"
+    password_recovery = "password_recovery"
+
+
+class ConfirmationCodeMessageSchema(BaseModel):
+    recipient: str
+    recipient_name: str
+    message: str
+    message_type: str

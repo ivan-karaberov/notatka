@@ -7,15 +7,15 @@ from core.db.db_helper import db_helper
 
 class AbstractRepository(ABC):
     @abstractmethod
-    async def add_one(data: dict):
+    async def add_one(self, data: dict):
         raise NotImplementedError
 
     @abstractmethod
-    async def fetch_one(**filters):
+    async def fetch_one(self, **filters):
         raise NotImplementedError
 
     @abstractmethod
-    async def fetch_all(**filters):
+    async def fetch_all(self, **filters):
         raise NotImplementedError
 
     @abstractmethod
@@ -23,11 +23,15 @@ class AbstractRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def update(id:int, **filters):
+    async def update(self, id:int, **filters):
         raise NotImplementedError
 
     @abstractmethod
-    async def update_multiply(id: list[int], **filters):
+    async def update_multiply(self, id: list[int], **filters):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def delete(self, obj):
         raise NotImplementedError
 
 
@@ -38,7 +42,7 @@ class SQLAlchemyRepository(AbstractRepository):
         async with db_helper.session_factory() as session:
             session.add(model)
             await session.commit()
-            return True
+            return model.id
 
     async def fetch_one(self, **filters):
         async with db_helper.session_factory() as session:
@@ -93,4 +97,9 @@ class SQLAlchemyRepository(AbstractRepository):
                 values(**filters)
             )
             await session.execute(stmt)
+            await session.commit()
+
+    async def delete(self, obj):
+        async with db_helper.session_factory() as session:
+            await session.delete(obj)
             await session.commit()

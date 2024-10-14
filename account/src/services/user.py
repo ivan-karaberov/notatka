@@ -1,15 +1,22 @@
+import uuid
+
 from models.user import User
 from schemas.auth import SignUpSchema
 from schemas.account import *
-from errors.api_errors import UserAlreadyExistsException, \
-                    UnauthorizedUserException, UsernameAlreadyExistsException
+from errors.api_errors import *
 from utils.auth import hash_password, validate_password
 from utils.repository import AbstractRepository
+from core.config import settings
+from core.redis.redis_helper import confirmations_codes
+from services.email import EmailService
+from repositories.email import UserEmailRepository
+from services.notifications import NotificationService
 
 
 class UserService:
     def __init__(self, user_repo: AbstractRepository) -> None:
         self.user_repo = user_repo()
+        self.email_service = EmailService(UserEmailRepository)
 
     async def create_user(
         self, signup_data: SignUpSchema, role_name: str = "User"
@@ -109,3 +116,68 @@ class UserService:
         """Деактивация аккаунта"""
         await self.user_repo.update(id=id, is_active=False)
         
+    async def add_email(self, user_id: int, email: str):
+        """Добавляет email пользователю и отправляет ссылку подтверждения"""
+        user_taken = await self.email_service.get_by_user_id(user_id)
+        email_taken = await self.email_service.get_by_email(email)
+
+        if not user_taken and not email_taken:
+            await self.email_service.add_email(user_id, email)
+            await self.__generate_code_and_send_email(user_id, email)
+            return
+
+        key = f"{MessageType.confirmation_email.value}:{email}"
+        redis_taken = confirmations_codes.get(key)
+        if not user_taken.is_confirmed and not redis_taken:
+            await self.__generate_code_and_send_email(user_id, user_taken.email)
+            return
+        
+        if redis_taken:
+            raise ConfirmationCodeAlreadySentException
+
+        if user_taken:
+            raise UserAlreadyLinkedEmailException
+
+        if email_taken:
+            raise EmailAlreadyExistsException
+
+
+    async def __generate_code_and_send_email(self, user_id: int, email: str):
+        """Генерирует код подтверждения и отправляет сообщение на почту"""
+        key = f"{MessageType.confirmation_email.value}:{email}"
+        confirmation_code = str(uuid.uuid4())
+        confirmations_codes.set(
+            name=key,
+            value=confirmation_code,
+            ex=settings.app.confirmation_code_expire_minutes*60
+        )
+        await self.__send_сonfirmation_email(user_id, email, confirmation_code)
+
+    async def __send_сonfirmation_email(
+        self, user_id: int, email: str, confirmation_code: str
+    ):
+        """Формирует сообщение и отправляет его на почту"""
+        user = await self.get_user_by_id(user_id)
+        app_url = settings.app.get_url()
+
+        message = ConfirmationCodeMessageSchema(
+            recipient=email,
+            recipient_name=user.firstName,
+            message=f"{app_url}/{MessageType.confirmation_email.value}?email={email}&confirmation_code={confirmation_code}",
+            message_type=MessageType.confirmation_email.value
+        )
+
+        async with NotificationService() as notification_service:
+            await notification_service.send_message(message)
+
+    async def confirmation_email(self, email: str, confirmation_code: str):
+        """Подтверждает email"""
+        key = f"{MessageType.confirmation_email.value}:{email}"
+        original_confirmation_code = confirmations_codes.get(key).decode('utf-8')
+        
+        if original_confirmation_code == confirmation_code:
+            await self.email_service.confirm_email(email)
+            confirmations_codes.delete(key)
+            return True
+        
+        raise ConfirmationCodeIncorrectException

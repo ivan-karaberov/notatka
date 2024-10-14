@@ -1,3 +1,4 @@
+import secrets
 from datetime import datetime, timedelta
 
 import jwt
@@ -72,3 +73,8 @@ def generate_auth_token_pair(payload: PayloadSchema):
         access_token=access_token,
         refresh_token=refresh_token
     )
+
+
+def generage_random_6_digit_code() -> str:
+    """Генерирует случайную 6 значную последовательность"""
+    return ''.join(secrets.choice("0123456789") for _ in range(6))

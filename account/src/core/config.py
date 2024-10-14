@@ -33,9 +33,28 @@ class AuthJWT(BaseSettings):
     refresh_token_expire_minutes: int = 4300
 
 
+class AppSettings(BaseSettings):
+    APP_HOST: str
+    APP_PORT: int
+    confirmation_code_expire_minutes: int = 5
+
+    def get_url(self):
+        return f"{self.APP_HOST}:{self.APP_PORT}"
+
+
+class BrokerSettings(BaseSettings):
+    KAFKA_HOST: str
+    KAFKA_PORT: int
+
+    def get_url(self):
+        return f"{self.KAFKA_HOST}:{self.KAFKA_PORT}"
+
+
 class Settings(BaseSettings):
     db: DbSettings = DbSettings()
+    app: AppSettings = AppSettings()
     redis: RedisSettings = RedisSettings()
+    broker: BrokerSettings = BrokerSettings()
     auth_jwt: AuthJWT = AuthJWT()
 
 

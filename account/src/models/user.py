@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import Base
 if TYPE_CHECKING:
     from .session import Session
+    from .user_emails import UserEmail
 
 class User(Base):
     id: Mapped[int] = mapped_column(
@@ -32,3 +33,4 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default='True')
     role: Mapped[str] = mapped_column(String(8), nullable=False)
     sessions: Mapped[List["Session"]] = relationship("Session", back_populates="user")
+    email: Mapped["UserEmail"] = relationship("UserEmail", back_populates="user", uselist=False)

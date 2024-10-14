@@ -19,6 +19,16 @@ class UsernameAlreadyExistsException(APIException):
     detail="Username already exists."
 
 
+class EmailAlreadyExistsException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail="Email already exists."
+
+
+class UserAlreadyLinkedEmailException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail="User already linked email attached."
+
+
 class UnauthorizedUserException(APIException):
     status_code = status.HTTP_403_FORBIDDEN
     detail="No rights to perform this action"
@@ -37,3 +47,18 @@ class TokenExpiredException(APIException):
 class InvalidRefreshTokenException(APIException):
     status_code = status.HTTP_403_FORBIDDEN
     detail = "Invalid refresh token"
+
+
+class ConfirmationCodeIncorrectException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "Invalid confirmation code"
+
+
+class ConfirmationCodeAlreadySentException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    detail = "Сonfirmation code already sent"
+
+
+class EmailNotFoundException(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = "Email not found"

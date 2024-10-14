@@ -15,7 +15,8 @@ router = APIRouter()
 async def signup(signup_data: SignUpSchema):
     """Регистрация нового аккаунта"""
     try:
-        return await UserService(UserRepository).create_user(signup_data)
+        user_id = await UserService(UserRepository).create_user(signup_data)
+        return {"user_id": user_id}
     except APIException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
     except Exception:
@@ -36,7 +37,7 @@ async def signin(signin_data: SignInSchema):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed signin"
-            )
+        )
 
 
 @router.put("/signout", status_code=status.HTTP_204_NO_CONTENT)
