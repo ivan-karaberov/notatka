@@ -57,3 +57,8 @@ class ConfirmationCodeIncorrectException(APIException):
 class ConfirmationCodeAlreadySentException(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     detail = "Сonfirmation code already sent"
+
+
+class EmailNotFoundException(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = "Email not found"

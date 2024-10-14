@@ -1,5 +1,6 @@
 from models.user_emails import UserEmail
 from utils.repository import AbstractRepository
+from errors.api_errors import EmailNotFoundException
 
 
 class EmailService:
@@ -29,3 +30,12 @@ class EmailService:
             id=email.id,
             is_confirmed=True
         )
+
+    async def delete_email(self, user_id: int):
+        """Удаляет email пользователя"""
+        email = await self.email_repo.fetch_one(user_id=user_id)
+
+        if not email:
+            raise EmailNotFoundException
+
+        await self.email_repo.delete(email)

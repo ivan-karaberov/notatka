@@ -9,7 +9,9 @@ from dependencies.auth import get_current_auth_user
 from errors.api_errors import APIException
 from services.user import UserService
 from services.auth import AuthService
+from services.email import EmailService
 from repositories.user import UserRepository
+from repositories.email import UserEmailRepository
 from schemas.account import *
 
 router = APIRouter()
@@ -166,4 +168,20 @@ async def confirmation_email(email: EmailStr, confirmation_code: str):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed confirmation email"
+        )
+
+
+@router.delete("/email")
+async def delete_email(
+    payload: PayloadSchema = Depends(get_current_auth_user)
+):
+    """Удаляет email пользователя"""
+    try:
+        await EmailService(UserEmailRepository).delete_email(payload.sub)
+    except APIException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed delete email"
         )
