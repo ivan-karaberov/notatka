@@ -174,7 +174,7 @@ class UserService:
         message = ConfirmationCodeMessageSchema(
             recipient=email,
             recipient_name=user.firstName,
-            message=f"{app_url}/{message_type.value}?email={email}&token={token}",
+            message=f"http://{app_url}/{message_type.value}?email={email}&token={token}",
             message_type=message_type.value
         )
 
