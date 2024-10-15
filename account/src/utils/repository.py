@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from sqlalchemy import select, update, func
+from sqlalchemy.orm import selectinload
 
 from core.db.db_helper import db_helper
 
@@ -12,6 +13,10 @@ class AbstractRepository(ABC):
 
     @abstractmethod
     async def fetch_one(self, **filters):
+        raise NotImplementedError
+
+    @abstractmethod
+    async def fetch_one_with_relationships(self, relationships, **filters):
         raise NotImplementedError
 
     @abstractmethod
@@ -47,6 +52,17 @@ class SQLAlchemyRepository(AbstractRepository):
     async def fetch_one(self, **filters):
         async with db_helper.session_factory() as session:
             stmt = select(self.model).filter_by(**filters).limit(1)
+            res = await session.execute(stmt)
+            return res.scalar_one_or_none()
+
+    async def fetch_one_with_relationships(self, relationships, **filters):
+        async with db_helper.session_factory() as session:
+            stmt = (
+                select(self.model)
+                .options(*[selectinload(getattr(self.model, rel)) for rel in relationships])
+                .filter_by(**filters)
+                .limit(1)
+            )
             res = await session.execute(stmt)
             return res.scalar_one_or_none()
 

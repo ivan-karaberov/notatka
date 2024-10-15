@@ -7,6 +7,11 @@ from pydantic import BaseModel, EmailStr, Field, validator
 from .auth import SignUpSchema
 
 
+class EmailDetailSchema(BaseModel):
+    email: str
+    is_confirmed: bool
+
+
 class AccountDetailSchema(BaseModel):
     id: int
     lastName: Annotated[str, Field(max_length=50)]
@@ -16,6 +21,7 @@ class AccountDetailSchema(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime]
     is_active: bool
+    email: Optional[EmailDetailSchema]
 
     @validator('username')
     def lowercase_username(cls, v):
