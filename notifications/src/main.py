@@ -1,10 +1,18 @@
 import asyncio
+import logging
 
 from core.config import settings
 from services.consumer import BrokerMessagePublisher
 from services.email import EmailMessageObserver
+from utils.logging_config import configure_logging
+
+
+log = logging.getLogger(__name__)
+
 
 async def main():
+    configure_logging()
+
     broker_publisher = BrokerMessagePublisher(
         bootstrap_servers=settings.broker.get_url(),
         group_id='account-group',
@@ -22,10 +30,8 @@ async def main():
 
     try:
         await broker_publisher.consume_messages()
-    except KeyboardInterrupt:
-        print("Consumer stopped.")
     except Exception as e:
-        print(f"Error > {e}")
+        log.error("Error in consume_message > %s", e)
 
 
 if __name__ == '__main__':

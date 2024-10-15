@@ -1,3 +1,5 @@
+import logging
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -6,6 +8,9 @@ from aiosmtplib import SMTP
 from core.config import settings
 from type import MessageType, Message
 from services.abstract_observer import AbstractMessageObserver
+
+log = logging.getLogger()
+
 
 class EmailService:
     def __init__(
@@ -16,8 +21,8 @@ class EmailService:
         self.smtp_user = smtp_user
         self.smtp_password = smtp_password
         self.message_subject = {
-            "confirmation_email": "Подтверждение email",
-            "password_recovery": "Восстановление пароля"
+            MessageType.confirmation_email.value: "Подтверждение email",
+            MessageType.password_recovery.value: "Восстановление пароля"
         }
 
     async def send(
@@ -38,15 +43,23 @@ class EmailService:
                 await server.sendmail(self.smtp_user, recipient, msg.as_string())
             return True
         except Exception as e:
-            print(f"An error occurred: {e}")
+            log.error(f"Failed to send email to %s: %s", recipient, e)
             return False
 
     def render_template(self, template_name: str, **params) -> str:
         """Загрузка и предварительная настройка html шаблона"""
         template_path = settings.TEMPLATES_DIR / template_name
 
-        with open(template_path, 'r', encoding='utf-8') as file:
-            template = file.read()
+        try:
+            with open(template_path, 'r', encoding='utf-8') as file:
+                template = file.read()
+        except FileNotFoundError as e:
+            log.error("Template not found: %s", template_name)
+            raise e
+        except Exception as e:
+            log.error("Error reading template: %s: {e}", template_name, e)
+            raise e
+
 
         for key, value in params.items():
             template = template.replace(f'{{{key}}}', str(value))
