@@ -90,8 +90,14 @@ class UserService:
 
     async def get_formatted_user_by_id(self, id: int) -> AccountDetailSchema | None:
         """Получает пользователя в преобразованом формате"""
-        if user := await self.get_user_by_id(id=id):
-            return AccountDetailSchema(**user.__dict__)
+        if user := await self.user_repo.fetch_one_with_relationships(['email'], id=id):
+            user_dict = user.__dict__
+            if user.email:
+                user_dict['email'] = EmailDetailSchema(
+                    email=user.email.email,
+                    is_confirmed=user.email.is_confirmed
+                )
+            return AccountDetailSchema(**user_dict)
 
     async def get_all_accounts(
         self,
