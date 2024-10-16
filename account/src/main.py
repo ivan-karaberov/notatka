@@ -4,8 +4,11 @@ from fastapi.responses import JSONResponse
 
 from api.routers import router as api_v1_router
 from errors.api_errors import APIException
+from utils.logging_config import configure_logging
 
+configure_logging()
 app = FastAPI()
+
 
 @app.exception_handler(APIException)
 async def custom_exception_handler(request: Request, exc: APIException):

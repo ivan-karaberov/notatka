@@ -1,10 +1,13 @@
 import json
 import asyncio
+import logging
 
 from aiokafka import AIOKafkaProducer
 
 from core.config import settings
 from schemas.account import ConfirmationCodeMessageSchema
+
+log = logging.getLogger(__name__)
 
 
 class ProducerService:
@@ -17,7 +20,10 @@ class ProducerService:
             loop=asyncio.get_running_loop(),
             bootstrap_servers=self.bootstrap_servers
         )
-        await self.producer.start()
+        try:
+            await self.producer.start()
+        except Exception as e:
+            log.error("Producer Service not started: %s", e)
 
     async def stop(self):
         await self.producer.stop()
@@ -31,11 +37,14 @@ class ProducerService:
         await self.stop()
     
     async def send(self, topic, key, value):
-        await self.producer.send_and_wait(
-            topic=topic,
-            value=value.encode('utf-8'),
-            key=key.encode('utf-8')
-        )
+        try:
+            await self.producer.send_and_wait(
+                topic=topic,
+                value=value.encode('utf-8'),
+                key=key.encode('utf-8')
+            )
+        except Exception as e:
+            log.error("Message not send to ProducerService: %s", e)
 
 
 class NotificationService(ProducerService):
@@ -44,6 +53,8 @@ class NotificationService(ProducerService):
         super().__init__(settings.broker.get_url())
 
     async def send_message(self, message: ConfirmationCodeMessageSchema) -> None:
-        print(message.__dict__)
-        message = json.dumps(message.__dict__)
-        await self.send(self.topic, "email", message)
+        try:
+            message = json.dumps(message.__dict__)
+            await self.send(self.topic, "email", message)
+        except Exception as e:
+            logging.error("Error sending message: %s", e)

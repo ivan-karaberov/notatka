@@ -1,4 +1,5 @@
 import uuid
+import logging
 from datetime import datetime, timedelta
 
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
@@ -15,6 +16,9 @@ from utils.auth import generate_auth_token_pair, validate_password
 from core.config import settings
 from core.redis.redis_helper import redis_helper
 from utils.auth import decode_jwt
+
+log = logging.getLogger(__name__)
+
 
 class AuthService:
     def __init__(self):
