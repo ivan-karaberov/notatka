@@ -124,32 +124,36 @@ class UserService:
         
     async def add_email(self, user_id: int, email: str):
         """Добавляет email пользователю и отправляет ссылку подтверждения"""
-        user_taken = await self.email_service.get_by_user_id(user_id)
+        user_taken = await self.user_repo.fetch_one_with_relationships(['email'], id=user_id)
         email_taken = await self.email_service.get_by_email(email)
         message_type = MessageType.confirmation_email
 
-        if not user_taken and not email_taken:
+        if not user_taken.email and not email_taken:
             await self.email_service.add_email(user_id, email)
             await self.__generate_code_and_send_email(user_id, email, message_type)
             return
-
-        redis_taken = await redis_helper.get_email_confirmation_code(
-            key=email,
-            category=message_type.value
-        )
-        if not user_taken.is_confirmed and not redis_taken:
-            await self.__generate_code_and_send_email(user_id, user_taken.email, message_type)
-            return
         
-        if redis_taken:
-            raise ConfirmationCodeAlreadySentException
+        if user_taken.email:
+            redis_taken = await redis_helper.get_email_confirmation_code(
+                key=user_taken.email.email,
+                category=message_type.value
+            )
+
+            if not user_taken.email.is_confirmed and not redis_taken:
+                await self.__generate_code_and_send_email(
+                    user_id=user_id,
+                    email=user_taken.email.email,
+                    message_type=message_type
+                )
+                return
+            elif redis_taken:
+                raise ConfirmationCodeAlreadySentException
 
         if user_taken:
             raise UserAlreadyLinkedEmailException
 
         if email_taken:
             raise EmailAlreadyExistsException
-
 
     async def __generate_code_and_send_email(
         self, user_id: int, email: str, message_type: MessageType
