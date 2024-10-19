@@ -1,6 +1,5 @@
-<!-- markdownlint-disable -->
 <p align="center">
-  <img src="artwork/notatka-logo-lite.svg#gh-light-mode-only" alt="Notatka Logo - Light" width="100%" height="auto" data-fit="scaledown"/>
-  <img src="artwork/notatka-logo-dark.svg#gh-dark-mode-only" alt="Notatka Logo - Dark" width="100%" height="auto" data-fit="scaledown"/>
+  <img src="artwork/notatka-logo.png" alt="Notatka Logo" />
 </p>
-<!-- markdownlint-restore -->
+
+**Notatka** is a powerful note-taking service designed to help users efficiently manage their notes and stay organized. Built as a monorepo with three microservices, Notatka aims to provide a seamless experience for users across various functionalities such as authentication, notifications, and notes management.
