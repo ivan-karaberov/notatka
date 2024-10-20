@@ -43,4 +43,10 @@ Contributions are welcome! Please feel free to submit a pull request or open an 
 
 ### License
 
-This project is licensed under the MIT License
+[CC BY-NC-SA 4.0](https://github.com/ivan-karaberov/notatka/blob/master/LICENSE)
+
+
+TLDR:
+- Clone and Use for Free: You are welcome to clone this repository and use it for your own purposes at no cost.
+- You can fork and change it (attribution and same license required)
+- You cannot sell it, it would not be fair
