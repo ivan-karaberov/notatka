@@ -41,7 +41,7 @@ class ConsumerService:
         )
 
         max_retries = 3
-        retry_delay = 5  # Задержка между попытками в секундах
+        retry_delay = 15  # Задержка между попытками в секундах
         while max_retries > 0:
             try:
                 await self.consumer.start()
