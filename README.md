@@ -35,7 +35,22 @@ users. All other services depend on it, it issues the JWT token and performs int
 
 ### Getting Started
 
-To get started with Notatka, clone the repository and follow the setup instructions in the respective microservice directories. Ensure that you have the necessary environment variables configured for each service.
+1) Clone the repository and navigate to the directory:
+    ```bash
+    git clone git@guthub.com:ivan-karaberov/notatka
+    cd notatka
+    ```
+
+2) Copy notifications/core/.env.example to notifications/core/.env and edit the .env file, populating it with all environment variables:
+
+    ```bash
+    cp notifications/src/core/.env.example notifications/src/core/.env
+    ```
+
+3) Run the services:
+
+    ```bash
+    docker compose up
 
 ### Contributing
 
