@@ -1,5 +1,6 @@
 import json
 import logging
+import asyncio
 
 from aiokafka import AIOKafkaConsumer
 
@@ -38,10 +39,18 @@ class ConsumerService:
             group_id=self.group_id,
             auto_offset_reset='earliest'
         )
-        try:
-            await self.consumer.start()
-        except Exception as e:
-            log.error("Error start consumer: %s", e)
+
+        max_retries = 3
+        retry_delay = 15  # Задержка между попытками в секундах
+        while max_retries > 0:
+            try:
+                await self.consumer.start()
+                break
+            except Exception as e:
+                log.error("Error start consumer: %s", e)
+                max_retries -= 1
+                if max_retries:
+                    await asyncio.sleep(retry_delay)
 
     async def process_message(self, msg) -> None:
         print(msg)

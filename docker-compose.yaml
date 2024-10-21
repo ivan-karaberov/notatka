@@ -1,6 +1,7 @@
 version: "3.8"
 services:
   zookeeper:
+    container_name: zookeeper
     image: bitnami/zookeeper:latest
     restart: on-failure
     ports:
@@ -12,6 +13,7 @@ services:
       ALLOW_ANONYMOUS_LOGIN: "yes"
 
   kafka:
+    container_name: kafka
     image: bitnami/kafka:latest
     restart: on-failure
     ports:
@@ -34,22 +36,48 @@ services:
     depends_on:
       - zookeeper
 
-  kowl:
-    image: quay.io/cloudhut/kowl:v1.4.0
-    restart: on-failure
-    volumes:
-    - ./kowl_config:/etc/kowl/
+  db:
+    container_name: db
+    image: postgres:14
     ports:
-    - "8080:8080"
-    entrypoint: ./kowl --config.filepath=/etc/kowl/config.yaml
+      - "3000:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  account:
+    container_name: account
+    build:
+      context: ./account
+      dockerfile: Dockerfile
     depends_on:
       - kafka
+      - redis
+      - db
+    ports:
+      - "8001:8001"
 
   notifications:
+    container_name: notifications
     build:
-      context: .
+      context: ./notifications
       dockerfile: Dockerfile
     depends_on:
       - kafka
     ports:
-      - "8000:8000"
+      - "8002:8002"
+
+volumes:
+  db_data:
+  redis_data:

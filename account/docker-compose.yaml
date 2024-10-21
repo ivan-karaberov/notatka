@@ -34,22 +34,29 @@ services:
     depends_on:
       - zookeeper
 
-  kowl:
-    image: quay.io/cloudhut/kowl:v1.4.0
-    restart: on-failure
-    volumes:
-    - ./kowl_config:/etc/kowl/
+  db:
+    container_name: db
+    image: postgres:14
     ports:
-    - "8080:8080"
-    entrypoint: ./kowl --config.filepath=/etc/kowl/config.yaml
-    depends_on:
-      - kafka
+      - "3000:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
 
-  notifications:
+  redis:
+    image: redis:latest
+    container_name: my-redis
+    ports:
+      - "6379:6379"
+
+  account:
     build:
       context: .
       dockerfile: Dockerfile
     depends_on:
       - kafka
+      - redis
+      - db
     ports:
-      - "8000:8000"
+      - "8001:8001"

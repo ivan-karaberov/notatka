@@ -19,6 +19,12 @@ async def signup(signup_data: SignUpSchema):
     try:
         user_id = await UserService(UserRepository).create_user(signup_data)
         return {"user_id": user_id}
+    except APIException as e:
+        log.info("Failed signup: %s", e)
+        raise HTTPException(
+            status_code=e.status_code,
+            detail=e.detail
+        )
     except Exception as e:
         log.error("Failed signup: %s", e)
         raise HTTPException(
@@ -32,6 +38,12 @@ async def signin(signin_data: SignInSchema):
     """Получение новой пары jwt пользователя"""
     try:
         return await AuthService().get_auth_token_pair(signin_data)
+    except APIException as e:
+        log.info("Failed signin: %s", e)
+        raise HTTPException(
+            status_code=e.status_code,
+            detail=e.detail
+        )
     except Exception as e:
         log.error("Failed signin: %s", e)
         raise HTTPException(
@@ -47,6 +59,12 @@ async def signout(
     """Выход из аккаунта"""
     try:
         await AuthService().signout(payload)
+    except APIException as e:
+        log.info("Failed signout: %s", e)
+        raise HTTPException(
+            status_code=e.status_code,
+            detail=e.detail
+        )
     except Exception as e:
         log.error("Failed signout: %s", e)
         raise HTTPException(
@@ -60,6 +78,12 @@ async def validate(accessToken: str):
     """Интроспекция токена"""
     try:
         return await AuthService().validate_token(accessToken)
+    except APIException as e:
+        log.info("Failed validation: %s", e)
+        raise HTTPException(
+            status_code=e.status_code,
+            detail=e.detail
+        )
     except Exception as e:
         log.error("Failed validation: %s", e)
         raise HTTPException(
@@ -74,6 +98,12 @@ async def refresh(refreshToken: RefreshTokenSchema):
     """Обновление пары токенов"""
     try:
         return await AuthService().refresh_token(refreshToken.refresh_token)
+    except APIException as e:
+        log.info("Failed refresh: %s", e)
+        raise HTTPException(
+            status_code=e.status_code,
+            detail=e.detail
+        )
     except Exception as e:
         log.error("Failed refresh: %s", e)
         raise HTTPException(
