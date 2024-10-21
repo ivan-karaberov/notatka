@@ -3,8 +3,6 @@ name = "notes-microservice"
 version = "0.1.0"
 description = ""
 authors = ["ivan-karaberov <karaberov.ivan@yandex.ru>"]
-readme = "README.md"
-packages = [{include = "notes_microservice"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"

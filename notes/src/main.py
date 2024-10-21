@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 
 from errors.api_errors import APIException
 from utils.logging_config import configure_logging
+from api.routers import router as api_v1_router
 
 configure_logging()
 app = FastAPI()
@@ -17,6 +18,7 @@ async def custom_exception_handler(request: Request, exc: APIException):
         content={"detail": exc.detail}
     )
 
+app.include_router(api_v1_router)
 
 if __name__ == '__main__':
-    uvicorn.run("main:app", host="localhost", port=8002, reload=True)
+    uvicorn.run("main:app", host="localhost", port=8003, reload=True)
