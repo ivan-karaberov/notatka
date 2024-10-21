@@ -14,7 +14,7 @@ RUN pip install poetry==$POETRY_VERSION
 WORKDIR /notifications
 
 COPY pyproject.toml poetry.lock ./
-RUN ls -la /notifications/
+
 RUN poetry config virtualenvs.create false && poetry install --only main --no-interaction --no-ansi
 
 COPY src/ ./
