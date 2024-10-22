@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from .notes import router as notes_router
+from .note import router as notes_router
 
 router = APIRouter()
 
