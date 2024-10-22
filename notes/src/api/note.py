@@ -5,6 +5,7 @@ from fastapi.exceptions import HTTPException
 
 from services.note import NoteService
 from schemas.user import UserPayloadSchema
+from schemas.note import NoteCreateSchema, NotePartialUpdateSchema
 from errors.api_errors import APIException
 
 router = APIRouter()
@@ -52,7 +53,7 @@ async def get_note_by_id(
 
 @router.patch("/")
 async def patch_note(
-    note_id: int, note_update: NoteUpdateSchema, user_payload: UserPayloadSchema
+    note_id: int, note_update: NotePartialUpdateSchema, user_payload: UserPayloadSchema
 ):
     try:
         return await NoteService().update_note(user_payload, note_id, note_update)
