@@ -20,18 +20,18 @@ users. All other services depend on it, it issues the JWT token and performs int
 **Description:** Manages user notifications, ensuring that users are informed about important events related to their notes and account activities.
 
 **Key Features:**
-- [ ] Create, read, update, and delete (CRUD) operations for notes
-- [ ] Tagging and categorization of notes
-- [ ] Search functionality to find notes quickly
-- [ ] Collaboration features for sharing notes with other users
+- [x] Email notifications for important events
+- [ ] User preferences for notification settings
 
 ### Notes
 
 **Description:** Handles all functionalities related to note creation, editing, and organization. This service allows users to create, update, delete, and retrieve their notes efficiently.
 
 **Key Features:**
-- [x] Email notifications for important events
-- [ ] User preferences for notification settings
+- [ ] Create, read, update, and delete (CRUD) operations for notes
+- [ ] Tagging and categorization of notes
+- [ ] Search functionality to find notes quickly
+- [ ] Collaboration features for sharing notes with other users
 
 ### Getting Started
 
