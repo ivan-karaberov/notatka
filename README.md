@@ -28,7 +28,7 @@ users. All other services depend on it, it issues the JWT token and performs int
 **Description:** Handles all functionalities related to note creation, editing, and organization. This service allows users to create, update, delete, and retrieve their notes efficiently.
 
 **Key Features:**
-- [ ] Create, read, update, and delete (CRUD) operations for notes
+- [x] Create, read, update, and delete (CRUD) operations for notes
 - [ ] Tagging and categorization of notes
 - [ ] Search functionality to find notes quickly
 - [ ] Collaboration features for sharing notes with other users
