@@ -55,13 +55,15 @@ class SQLAlchemyRepository[T](AbstractRepository):
         try:
             stmt = (
                 update(self.model).
-                filter_by(id=id).
+                where(self.model.id == id).
                 values(**filters).
                 returning(self.model)
             )
             result = await self.session.execute(stmt)
             await self.session.commit()
-            return result.fetchone()
+            updated_object = result.fetchone()
+            if updated_object:
+                return updated_object[0]
         except Exception as e:
             await self.session.rollback()
             log.error("DB Repository failed update > %s", e)
