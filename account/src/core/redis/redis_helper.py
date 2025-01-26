@@ -5,19 +5,9 @@ from core.config import settings
 
 class RedisHelper:
     def __init__(self, host: str, port: int):
-        self.jwt_tokens = aioredis.from_url(
+        self.confirmation_codes = aioredis.from_url(
             f"redis://{host}:{port}/0"
         )
-        self.confirmation_codes = aioredis.from_url(
-            f"redis://{host}:{port}/1"
-        )
-
-    async def add_token_to_black_list(self, key: str, val: str, expiration: int
-    ):
-        await self.jwt_tokens.set(f"black_list:{key}", val, ex=expiration)
-
-    async def get_token_from_black_list(self, key: str):
-        return await self.jwt_tokens.get(f"black_list:{key}")
 
     async def add_email_confirmation_code(
         self, key: str, category: str, val: str, expiration: int

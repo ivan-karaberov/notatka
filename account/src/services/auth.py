@@ -56,12 +56,7 @@ class AuthService:
         return tokens
 
     async def signout(self, payload: PayloadSchema):
-        """Закрывает сессию и добавляет токен в черный список"""
-        await redis_helper.add_token_to_black_list(
-            key=payload.session_uuid,
-            val=payload.sub,
-            expiration=settings.auth_jwt.access_token_expire_minutes*60
-        )
+        """Закрывает сессию"""
         await self.session_service.deactivate_session(payload.session_uuid)
 
     async def refresh_token(self, refresh_token: RefreshTokenSchema) -> TokenPairSchema:
@@ -125,8 +120,7 @@ class AuthService:
 
         user = await self.user_service.get_user_by_id(sub)
 
-        token = await redis_helper.get_token_from_black_list(session_uuid)
-        if token or (not user.is_active):
+        if not user.is_active:
             raise InvalidTokenException
 
         # Если мы ожидали accessToken а нам передали refreshToken
