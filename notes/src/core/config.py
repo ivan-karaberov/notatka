@@ -12,7 +12,8 @@ class DbSettings(BaseSettings):
     DB_PASS: str
     echo: bool = False
 
-    def get_url(self):
+    @property
+    def DB_URL(self) -> str:
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
 

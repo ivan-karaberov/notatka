@@ -3,9 +3,9 @@ import logging
 from fastapi import APIRouter, status
 from fastapi.exceptions import HTTPException
 
-from services.note import NoteService
-from schemas.user import UserPayloadSchema
 from schemas.note import NoteCreateSchema, NotePartialUpdateSchema
+from dependencies.note import NoteDependency
+from dependencies.auth import PayloadDependency
 from errors.api_errors import APIException
 
 router = APIRouter()
@@ -13,9 +13,13 @@ log = logging.getLogger(__name__)
 
 
 @router.post("/")
-async def add_note(user_payload: UserPayloadSchema, note: NoteCreateSchema):
+async def add_note(
+    user_payload: PayloadDependency,
+    note: NoteCreateSchema,
+    note_service: NoteDependency
+):
     try:
-        note_id = await NoteService().add_note(user_payload, note)
+        note_id = await note_service.add_note(user_payload, note)
         return {"note_id": note_id}
     except APIException as e:
         log.info("Note not saved: %s", e)
@@ -33,10 +37,10 @@ async def add_note(user_payload: UserPayloadSchema, note: NoteCreateSchema):
     
 @router.get("/")
 async def get_note_by_id(
-    note_id: int, user_payload: UserPayloadSchema
+    note_id: int, user_payload: PayloadDependency, note_service: NoteDependency
 ):
     try:
-        return await NoteService().get_note_by_id(user_payload, note_id)
+        return await note_service.get_note_by_id(user_payload, note_id)
     except APIException as e:
         log.info("Note not received: %s", e)
         raise HTTPException(
@@ -53,10 +57,13 @@ async def get_note_by_id(
 
 @router.patch("/")
 async def patch_note(
-    note_id: int, note_update: NotePartialUpdateSchema, user_payload: UserPayloadSchema
+    note_id: int,
+    note_update: NotePartialUpdateSchema,
+    user_payload: PayloadDependency,
+    note_service: NoteDependency
 ):
     try:
-        return await NoteService().update_note(user_payload, note_id, note_update)
+        return await note_service.update_note(user_payload, note_id, note_update)
     except APIException as e:
         log.info("Note not updated: %s", e)
         raise HTTPException(
@@ -72,9 +79,13 @@ async def patch_note(
 
 
 @router.delete("/")
-async def delete_note(note_id: int, user_payload: UserPayloadSchema):
+async def delete_note(
+    note_id: int,
+    user_payload: PayloadDependency,
+    note_service: NoteDependency
+):
     try:
-        return await NoteService().delete_note(user_payload, note_id)
+        return await note_service.delete_note(user_payload, note_id)
     except APIException as e:
         log.info("Note not deleted: %s", e)
         raise HTTPException(
